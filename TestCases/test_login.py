@@ -5,17 +5,20 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from Pages.loginPage import LoginPage
+from Utilities.driver import get_driver
+from Utilities.logs import LogGen
+
 
 global driver
-driver = webdriver.Chrome(ChromeDriverManager().install())
+driver = get_driver("chrome")
 
 
 class TestLogin001:
     base_url = "https://admin-demo.nopcommerce.com/login?ReturnUrl=%2Fadmin%2F"
     username = "admin@yourstore.com"
     password = "admin@yourstore.com"
-    login_page_title = "Your store. Login222"
-    home_page_title = "Dashboard / nopCommerce administration22"
+    login_page_title = "Your store. Login"
+    home_page_title = "Dashboard / nopCommerce administration"
 
     @pytest.fixture()
     def test_setup(self):
@@ -25,18 +28,21 @@ class TestLogin001:
         driver.close()
         driver.quit()
 
+    @pytest.mark.regression
     def test_login_01(self):
         driver.get(self.base_url)
-        assert driver.title == self.login_page_title
+        if driver.title == self.login_page_title:
+            assert True
+        else:
+            driver.save_screenshot('.\\Screenshots\\' + "test_LoginPagetitle.png")
 
     def test_login_02(self, test_setup):
         driver.get(self.base_url)
-        self.lp = LoginPage(driver)
-        self.lp.enter_username(self.username)
+        lp = self.lp = LoginPage(driver)
+        lp.enter_username(self.username)
         time.sleep(3)
-        self.lp.enter_password(self.password)
-        time.sleep(4)
-        self.lp.click_login()
+        lp.enter_password(self.password)
+        lp.click_login()
         time.sleep(4)
         if driver.title == self.home_page_title:
             assert True
